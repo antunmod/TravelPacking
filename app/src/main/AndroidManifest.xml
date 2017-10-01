@@ -19,7 +19,8 @@
         <activity
             android:name=".ScrollingActivity"
             android:label="Select items to pack"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".WardrobeActivity"></activity>
     </application>
 
 </manifest>

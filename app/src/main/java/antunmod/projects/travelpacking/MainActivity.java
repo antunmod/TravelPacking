@@ -9,6 +9,7 @@ import android.widget.TextView;
 public class MainActivity extends AppCompatActivity {
 
     private TextView packTextView;
+    private TextView wardrobeTextView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -19,6 +20,15 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent switchIntent = new Intent (view.getContext(), ScrollingActivity.class);
+                startActivity(switchIntent);
+            }
+        });
+
+        wardrobeTextView = (TextView) findViewById(R.id.wardrobeTextView);
+        wardrobeTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent switchIntent = new Intent (view.getContext(), WardrobeActivity.class);
                 startActivity(switchIntent);
             }
         });
