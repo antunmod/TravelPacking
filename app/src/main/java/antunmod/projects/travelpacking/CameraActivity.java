@@ -1,12 +1,14 @@
 package antunmod.projects.travelpacking;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Adapter;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -30,6 +32,8 @@ public class CameraActivity extends AppCompatActivity {
     Button btnTakePhoto;
     ArrayAdapter<String> dataAdapter;
     List<String> spinnerList;
+    boolean itemTypeExists = false;
+    int CAPTURE_IMAGE_REQUEST_CODE = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,19 +51,25 @@ public class CameraActivity extends AppCompatActivity {
                 if(!editItemType.getText().toString().isEmpty()) {
                     String newItemType = editItemType.getText().toString();
                     for (String item : spinnerList) {
-                        if(item.equals(newItemType.toUpperCase()))
+                        if(item.equals(newItemType.toUpperCase())) {
                             Toast.makeText(CameraActivity.this, "The Item type with the given name already exists!", Toast.LENGTH_LONG).show();
+                            itemTypeExists = true;
+                            break;
+                        }
                     }
-                    createDirectory(newItemType);
+                    if(!itemTypeExists)
+                        createDirectory(newItemType);
                 }
+
                 else {
                     String newItemName = editItemName.getText().toString();
                     String fileLocation = FOLDER_LOCATION + File.separator + spinner.getSelectedItem().toString();
                     if(filenameExists(fileLocation, newItemName))
                         Toast.makeText(getApplicationContext(), "The item with the given name already exists!", Toast.LENGTH_LONG).show();
+                    else
+                        capturePhoto(editItemName.getText().toString() + ".jpg", FOLDER_LOCATION + File.separator + spinner.getSelectedItem().toString());
                 }
 
-                Adapter adapter = spinner.getAdapter();
 
             }
         });
@@ -83,9 +93,11 @@ public class CameraActivity extends AppCompatActivity {
     private void createDirectory (String newFolderName) {
         File directory = new File(FOLDER_LOCATION + File.separator +  newFolderName.toUpperCase());
         if(!directory.exists())
-            if(directory.mkdir())
-                Toast.makeText(getApplicationContext(), "New item type created!", Toast.LENGTH_LONG).show();
-        //addItemsToSpinner();
+            if(directory.mkdir()) {
+                //Toast.makeText(getApplicationContext(), "New item type created!", Toast.LENGTH_LONG).show();
+                capturePhoto(editItemName.getText().toString() + ".jpg", directory.getAbsolutePath());
+                //addItemsToSpinner();
+            }
     }
 
     private boolean filenameExists (String fileLocation, String filename) {
@@ -96,6 +108,28 @@ public class CameraActivity extends AppCompatActivity {
                 return true;
         }
         return false;
+    }
+
+    private boolean capturePhoto(String newImageName, String filepath) {
+        Intent imageIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        File image = new File(filepath, newImageName);
+        Uri uriSavedImage = Uri.fromFile(image);
+
+        imageIntent.putExtra(MediaStore.EXTRA_OUTPUT, uriSavedImage);
+        startActivityForResult(imageIntent, CAPTURE_IMAGE_REQUEST_CODE);
+        return true;
+    }
+
+    @Override
+    protected void onActivityResult (int requestCode, int resultCode, Intent imageReturnedIntent) {
+        if(requestCode == CAPTURE_IMAGE_REQUEST_CODE) {
+            if(resultCode == RESULT_OK) {
+                Toast.makeText(getApplicationContext(), "Image saved successfully", Toast.LENGTH_LONG).show();
+            }
+            else Toast.makeText(getApplicationContext(), "Image not saved", Toast.LENGTH_LONG).show();
+
+        }
+        //finish();
     }
 
     private ArrayList<ImageItem> getData() {
