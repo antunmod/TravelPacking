@@ -16,7 +16,11 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -62,13 +66,16 @@ public class CameraActivity extends AppCompatActivity {
                 }
 
                 else {
-                    String newItemName = editItemName.getText().toString();
-                    String fileLocation = FOLDER_LOCATION + File.separator + spinner.getSelectedItem().toString();
-                    if(filenameExists(fileLocation, newItemName))
+                    String imageName = editItemName.getText().toString();
+                    String folderName = spinner.getSelectedItem().toString();
+                    String fileLocation = FOLDER_LOCATION  + File.separator + ".fullSize" + File.separator + folderName;
+                    if(filenameExists(fileLocation, imageName))
                         Toast.makeText(getApplicationContext(), "The item with the given name already exists!", Toast.LENGTH_LONG).show();
-                    else
-                        capturePhoto(editItemName.getText().toString() + ".jpg", FOLDER_LOCATION + File.separator + spinner.getSelectedItem().toString());
-                }
+                    else {
+                        capturePhoto(imageName + ".jpg", fileLocation);
+                        //compressAndSaveImage(FOLDER_LOCATION + File.separator + ".compressed" + File.separator + folderName, imageName + ".jpg");
+                    }
+                    }
 
 
             }
@@ -77,7 +84,7 @@ public class CameraActivity extends AppCompatActivity {
 
     private void addItemsToSpinner() {
         spinnerList = new ArrayList<>();
-        File dir = new File(FOLDER_LOCATION);
+        File dir = new File(FOLDER_LOCATION + File.separator + ".fullSize");
         File[] directoryList = dir.listFiles();
         if(directoryList==null)
             return;
@@ -91,11 +98,14 @@ public class CameraActivity extends AppCompatActivity {
     }
 
     private void createDirectory (String newFolderName) {
-        File directory = new File(FOLDER_LOCATION + File.separator +  newFolderName.toUpperCase());
+        File directory = new File(FOLDER_LOCATION + File.separator +  ".fullSize" + File.separator + newFolderName.toUpperCase());
         if(!directory.exists())
             if(directory.mkdir()) {
                 //Toast.makeText(getApplicationContext(), "New item type created!", Toast.LENGTH_LONG).show();
-                capturePhoto(editItemName.getText().toString() + ".jpg", directory.getAbsolutePath());
+                String imageName = editItemName.getText().toString() + ".jpg";
+                String imageLocation = FOLDER_LOCATION + File.separator + ".compressed" + File.separator + newFolderName;
+                capturePhoto(imageName, directory.getAbsolutePath());
+                //compressAndSaveImage(imageLocation, imageName);
                 //addItemsToSpinner();
             }
     }
@@ -110,42 +120,34 @@ public class CameraActivity extends AppCompatActivity {
         return false;
     }
 
-    private boolean capturePhoto(String newImageName, String filepath) {
+    private void capturePhoto(String imageName, String filepath) {
         Intent imageIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        File image = new File(filepath, newImageName);
+        File image = new File(filepath, imageName);
         Uri uriSavedImage = Uri.fromFile(image);
+
+        imageIntent.putExtra("imageName", imageName);
 
         imageIntent.putExtra(MediaStore.EXTRA_OUTPUT, uriSavedImage);
         startActivityForResult(imageIntent, CAPTURE_IMAGE_REQUEST_CODE);
-        return true;
+        return;
     }
 
     @Override
     protected void onActivityResult (int requestCode, int resultCode, Intent imageReturnedIntent) {
         if(requestCode == CAPTURE_IMAGE_REQUEST_CODE) {
             if(resultCode == RESULT_OK) {
+                if(editItemType.getText().toString().isEmpty())
+                    compressAndSaveImage(FOLDER_LOCATION + File.separator + ".fullSize" + File.separator + spinner.getSelectedItem().toString(), editItemName.getText().toString());
+                else
+                    compressAndSaveImage(FOLDER_LOCATION + File.separator + ".fullSize" + File.separator + editItemType.getText().toString(), editItemName.getText().toString());
+
                 Toast.makeText(getApplicationContext(), "Image saved successfully", Toast.LENGTH_LONG).show();
+
             }
             else Toast.makeText(getApplicationContext(), "Image not saved", Toast.LENGTH_LONG).show();
 
         }
         //finish();
-    }
-
-    private ArrayList<ImageItem> getData() {
-        final ArrayList<ImageItem> imageItems = new ArrayList<>();
-        File dir = new File(FOLDER_LOCATION);
-        File[] imageList = dir.listFiles(IMAGE_FILTER);
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inSampleSize = 8;
-        if(imageList==null)
-            return imageItems;
-        for (File f : imageList) {
-            Bitmap bitmap = BitmapFactory.decodeFile(f.getAbsolutePath(), options);
-            //bitmap = getResizedBitmap(bitmap, 200, 200);
-            imageItems.add(new ImageItem(bitmap, "Test"));
-        }
-        return imageItems;
     }
 
     // filter to identify images based on their extensions
@@ -162,4 +164,97 @@ public class CameraActivity extends AppCompatActivity {
         }
     };
 
+    public void compressAndSaveImage(String imageLocation, String imageName) {
+        //get to correct folder
+        File compressedImageDirectory;
+        if(editItemType.getText().toString().isEmpty()) {
+            //create new folder
+            String folderName = spinner.getSelectedItem().toString();
+            String path = FOLDER_LOCATION + File.separator + ".compressed" + File.separator + folderName;
+            File directory = new File(path);
+            if(!directory.exists())
+                directory.mkdir();
+            compressedImageDirectory = new File(FOLDER_LOCATION + File.separator + ".compressed"
+                    + File.separator + spinner.getSelectedItem().toString());
+        }
+        else {
+            //create new folder
+            String folderName = editItemType.getText().toString().toUpperCase();
+            String path = FOLDER_LOCATION + File.separator + ".compressed" + File.separator + folderName;
+            MainActivity.createRequiredFolder(path);
+            compressedImageDirectory  = new File(path);
+        }
+
+        String folderName = compressedImageDirectory.getName();
+        String imageFile = imageLocation + File.separator + imageName + ".jpg";
+        //String fullSizedFile = FOLDER_LOCATION + File.separator + ".compressed" + File.separator + folderName;
+        OutputStream outStream;
+        File file = new File (compressedImageDirectory, imageName + ".jpg");
+        //File fullSizeImage = new File(imageLocation + File.separator + imageName);
+        //File compressedImage = new File(FOLDER_LOCATION + File.separator + ".compressed" + File.separator + folderName + File.separator + imageName);
+
+        Bitmap bm = ShrinkBitmap(imageFile, 300, 300);
+
+        // Put the following code in a separate method, find a way not to send values a million times in different
+        // methods
+        try {
+
+            outStream = new FileOutputStream(file);
+            bm.compress(Bitmap.CompressFormat.JPEG, 100, outStream);
+
+            outStream.flush();
+            outStream.close();
+            Toast.makeText(getApplicationContext(), "Saved", Toast.LENGTH_LONG).show();
+        } catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            Toast.makeText(getApplicationContext(), e.toString(), Toast.LENGTH_LONG).show();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            Toast.makeText(getApplicationContext(), e.toString(), Toast.LENGTH_LONG).show();
+        }
+    }
+
+    Bitmap ShrinkBitmap(String file, int width, int height){
+
+        BitmapFactory.Options bmpFactoryOptions = new BitmapFactory.Options();
+        bmpFactoryOptions.inJustDecodeBounds = true;
+        Bitmap bitmap = BitmapFactory.decodeFile(file, bmpFactoryOptions);
+
+        int heightRatio = (int)Math.ceil(bmpFactoryOptions.outHeight/(float)height);
+        int widthRatio = (int)Math.ceil(bmpFactoryOptions.outWidth/(float)width);
+
+        if (heightRatio > 1 || widthRatio > 1)
+        {
+            if (heightRatio > widthRatio)
+            {
+                bmpFactoryOptions.inSampleSize = heightRatio;
+            } else {
+                bmpFactoryOptions.inSampleSize = widthRatio;
+            }
+        }
+
+        bmpFactoryOptions.inJustDecodeBounds = false;
+        bitmap = BitmapFactory.decodeFile(file, bmpFactoryOptions);
+        return bitmap;
+    }
+
+
+
+    private ArrayList<ImageItem> getData() {
+        final ArrayList<ImageItem> imageItems = new ArrayList<>();
+        File dir = new File(FOLDER_LOCATION);
+        File[] imageList = dir.listFiles(IMAGE_FILTER);
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inSampleSize = 8;
+        if(imageList==null)
+            return imageItems;
+        for (File f : imageList) {
+            Bitmap bitmap = BitmapFactory.decodeFile(f.getAbsolutePath(), options);
+            //bitmap = getResizedBitmap(bitmap, 200, 200);
+            imageItems.add(new ImageItem(bitmap, "Test"));
+        }
+        return imageItems;
+    }
 }
