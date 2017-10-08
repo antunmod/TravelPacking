@@ -3,6 +3,7 @@ package antunmod.projects.travelpacking;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -75,7 +76,7 @@ public class CameraActivity extends AppCompatActivity {
                         capturePhoto(imageName + ".jpg", fileLocation);
                         //compressAndSaveImage(FOLDER_LOCATION + File.separator + ".compressed" + File.separator + folderName, imageName + ".jpg");
                     }
-                    }
+                }
 
 
             }
@@ -167,10 +168,11 @@ public class CameraActivity extends AppCompatActivity {
     public void compressAndSaveImage(String imageLocation, String imageName) {
         //get to correct folder
         File compressedImageDirectory;
+        String path;
         if(editItemType.getText().toString().isEmpty()) {
             //create new folder
             String folderName = spinner.getSelectedItem().toString();
-            String path = FOLDER_LOCATION + File.separator + ".compressed" + File.separator + folderName;
+            path = FOLDER_LOCATION + File.separator + ".compressed" + File.separator + folderName;
             File directory = new File(path);
             if(!directory.exists())
                 directory.mkdir();
@@ -180,7 +182,7 @@ public class CameraActivity extends AppCompatActivity {
         else {
             //create new folder
             String folderName = editItemType.getText().toString().toUpperCase();
-            String path = FOLDER_LOCATION + File.separator + ".compressed" + File.separator + folderName;
+            path = FOLDER_LOCATION + File.separator + ".compressed" + File.separator + folderName;
             MainActivity.createRequiredFolder(path);
             compressedImageDirectory  = new File(path);
         }
@@ -197,7 +199,10 @@ public class CameraActivity extends AppCompatActivity {
 
         // Put the following code in a separate method, find a way not to send values a million times in different
         // methods
+        int o = 0;
         try {
+            ExifInterface ei = new ExifInterface(imageLocation + File.separator + imageName);
+            o = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
 
             outStream = new FileOutputStream(file);
             bm.compress(Bitmap.CompressFormat.JPEG, 100, outStream);
@@ -214,6 +219,16 @@ public class CameraActivity extends AppCompatActivity {
             e.printStackTrace();
             Toast.makeText(getApplicationContext(), e.toString(), Toast.LENGTH_LONG).show();
         }
+        ExifInterface ei2 = null;
+        try {
+            ei2 = new ExifInterface(path + File.separator + imageName);
+            ei2.setAttribute(ExifInterface.TAG_ORIENTATION, String.valueOf(o));
+            ei2.saveAttributes();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        //saveOrientationAttributes(imageLocation, imageName + ".jpg", path);
     }
 
     Bitmap ShrinkBitmap(String file, int width, int height){
@@ -227,12 +242,12 @@ public class CameraActivity extends AppCompatActivity {
 
         if (heightRatio > 1 || widthRatio > 1)
         {
-            if (heightRatio > widthRatio)
-            {
+            /*if (heightRatio > widthRatio)
+            {*/
                 bmpFactoryOptions.inSampleSize = heightRatio;
-            } else {
+            /*} else {
                 bmpFactoryOptions.inSampleSize = widthRatio;
-            }
+            }*/
         }
 
         bmpFactoryOptions.inJustDecodeBounds = false;
@@ -240,7 +255,19 @@ public class CameraActivity extends AppCompatActivity {
         return bitmap;
     }
 
+    private void saveOrientationAttributes(String imageLocation, String imageName, String compressedImagePath)  {
+        ExifInterface ei = null;
+        try {
+            ei = new ExifInterface(imageLocation + File.separator + imageName);
+            int o = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+            ExifInterface ei2 = new ExifInterface(compressedImagePath + File.separator + imageName);
+            ei2.setAttribute(ExifInterface.TAG_ORIENTATION, String.valueOf(o));
+            ei2.saveAttributes();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
+    }
 
     private ArrayList<ImageItem> getData() {
         final ArrayList<ImageItem> imageItems = new ArrayList<>();

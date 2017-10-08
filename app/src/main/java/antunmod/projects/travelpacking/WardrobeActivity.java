@@ -22,7 +22,7 @@ public class WardrobeActivity extends AppCompatActivity {
     private GridViewAdapter gridAdapter;
     // array of supported extensions (use a List if you prefer)
     static final String[] EXTENSIONS = new String[]{
-            "gif", "png", "bmp" // and other formats you need
+            "gif", "png", "bmp", "jpg" // and other formats you need
     };
     final String FOLDER_LOCATION = Environment.getExternalStorageDirectory() + File.separator + "TravelPacking";
     private FloatingActionButton addNewItem;
@@ -57,35 +57,27 @@ public class WardrobeActivity extends AppCompatActivity {
 
     private ArrayList<ImageItem> getData() {
         final ArrayList<ImageItem> imageItems = new ArrayList<>();
-        File dir = new File(FOLDER_LOCATION);
-        File[] imageList = dir.listFiles(IMAGE_FILTER);
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inSampleSize = 8;
-        if(imageList==null)
+        File dir = new File(FOLDER_LOCATION + File.separator + ".compressed");
+        File[] folderList = dir.listFiles();
+        for(File folder : folderList) {
+            File[] images = folder.listFiles(IMAGE_FILTER);
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inSampleSize = 8;
+            for(File image : images) {
+                Bitmap bitmap = BitmapFactory.decodeFile(image.getAbsolutePath(), options);
+                //bitmap = getResizedBitmap(bitmap, 200, 200);
+                imageItems.add(new ImageItem(bitmap, image.getName()));
+            }
+        }
+
+        /*if(imageList==null)
             return imageItems;
         for (File f : imageList) {
             Bitmap bitmap = BitmapFactory.decodeFile(f.getAbsolutePath(), options);
             //bitmap = getResizedBitmap(bitmap, 200, 200);
             imageItems.add(new ImageItem(bitmap, "Test"));
-        }
+        }*/
         return imageItems;
-    }
-
-    public Bitmap getResizedBitmap(Bitmap bm, int newWidth, int newHeight) {
-        int width = bm.getWidth();
-        int height = bm.getHeight();
-        float scaleWidth = ((float) newWidth) / width;
-        float scaleHeight = ((float) newHeight) / height;
-        // CREATE A MATRIX FOR THE MANIPULATION
-        Matrix matrix = new Matrix();
-        // RESIZE THE BIT MAP
-        matrix.postScale(scaleWidth, scaleHeight);
-
-        // "RECREATE" THE NEW BITMAP
-        Bitmap resizedBitmap = Bitmap.createBitmap(
-                bm, 0, 0, width, height, matrix, false);
-        bm.recycle();
-        return resizedBitmap;
     }
 
     // filter to identify images based on their extensions
