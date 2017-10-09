@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
 import android.os.Environment;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -26,8 +25,6 @@ public class WardrobeActivity extends AppCompatActivity {
     };
     final String FOLDER_LOCATION = Environment.getExternalStorageDirectory() + File.separator + "TravelPacking";
     private FloatingActionButton addNewItem;
-    static final int REQUEST_IMAGE_CAPTURE = 1;
-    String mCurrentPhotoPath;
     SharedPreferences prefs;
     static final int REQUEST_CODE = 1;
 
@@ -59,13 +56,16 @@ public class WardrobeActivity extends AppCompatActivity {
         final ArrayList<ImageItem> imageItems = new ArrayList<>();
         File dir = new File(FOLDER_LOCATION + File.separator + ".compressed");
         File[] folderList = dir.listFiles();
+        if(folderList.length == 0)
+            return imageItems;
         for(File folder : folderList) {
             File[] images = folder.listFiles(IMAGE_FILTER);
+            if (images.length == 0)
+                return imageItems;
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inSampleSize = 8;
             for(File image : images) {
                 Bitmap bitmap = BitmapFactory.decodeFile(image.getAbsolutePath(), options);
-                //bitmap = getResizedBitmap(bitmap, 200, 200);
                 imageItems.add(new ImageItem(bitmap, image.getName()));
             }
         }
