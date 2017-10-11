@@ -60,7 +60,7 @@ public class CameraActivity extends AppCompatActivity {
                 //If something is written in the ItemTypeEditText field, check whether to add new item
                 if(!itemType.isEmpty()) {
 
-                    if(!itemTypeExists(itemType) && imageNameIsGood(imageName)) {
+                    if(!itemTypeExists(itemType) && imageNameIsValid(imageName)) {
 
                         createDirectories(itemType);
                         fullSizeImageFolderLocation = FULL_SIZE_FOLDER_LOCATION + File.separator + itemType;
@@ -74,7 +74,7 @@ public class CameraActivity extends AppCompatActivity {
                         Toast.makeText(getApplicationContext(), "Enter item type to continue!", Toast.LENGTH_LONG).show();
                     }
 
-                    else if (imageNameIsGood(imageName)) {
+                    else if (imageNameIsValid(imageName)) {
                         itemType = spinner.getSelectedItem().toString();
                         fullSizeImageFolderLocation = FULL_SIZE_FOLDER_LOCATION + File.separator + itemType;
                         if (filenameExists(fullSizeImageFolderLocation, imageName))
@@ -121,7 +121,7 @@ public class CameraActivity extends AppCompatActivity {
         }
     }
 
-    private boolean imageNameIsGood(String imageName) {
+    private boolean imageNameIsValid(String imageName) {
 
         //remove spaces before
         while(imageName.startsWith(" ")) {

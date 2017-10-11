@@ -13,6 +13,7 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView packTextView;
     private TextView wardrobeTextView;
+    private TextView listsTextView;
     private String FOLDER_LOCATION = Environment.getExternalStorageDirectory() + File.separator + "TravelPacking";
     private String COMPRESSED_FOLDER_LOCATION = FOLDER_LOCATION + File.separator + ".compressed";
     private String FULL_SIZE_FOLDER_LOCATION = FOLDER_LOCATION + File.separator + ".fullSize";
@@ -49,6 +50,16 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(switchIntent);
             }
         });
+
+        listsTextView = (TextView) findViewById(R.id.listsTextView);
+        listsTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent switchIntent = new Intent (view.getContext(), ListsActivity.class);
+                startActivity(switchIntent);
+            }
+        });
+
 
 
     }
