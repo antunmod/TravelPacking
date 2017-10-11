@@ -13,16 +13,24 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView packTextView;
     private TextView wardrobeTextView;
-    private String applicationLocation = Environment.getExternalStorageDirectory() + File.separator + "TravelPacking";
+    private String FOLDER_LOCATION = Environment.getExternalStorageDirectory() + File.separator + "TravelPacking";
+    private String COMPRESSED_FOLDER_LOCATION = FOLDER_LOCATION + File.separator + ".compressed";
+    private String FULL_SIZE_FOLDER_LOCATION = FOLDER_LOCATION + File.separator + ".fullSize";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         // create required folders for storage
-        createRequiredFolder(applicationLocation);
-        createRequiredFolder(applicationLocation + File.separator + ".compressed");
-        createRequiredFolder(applicationLocation + File.separator + ".fullSize");
+        createRequiredFolder(FOLDER_LOCATION);
+        createRequiredFolder(COMPRESSED_FOLDER_LOCATION);
+        createRequiredFolder(FULL_SIZE_FOLDER_LOCATION);
+
+        File dir = new File (COMPRESSED_FOLDER_LOCATION);
+
+        //Wait until the folder creates
+        while(!dir.exists());
 
         packTextView = (TextView) findViewById(R.id.packTextView);
         packTextView.setOnClickListener(new View.OnClickListener() {

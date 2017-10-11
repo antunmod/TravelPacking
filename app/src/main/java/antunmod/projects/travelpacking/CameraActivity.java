@@ -59,15 +59,12 @@ public class CameraActivity extends AppCompatActivity {
 
                 //If something is written in the ItemTypeEditText field, check whether to add new item
                 if(!itemType.isEmpty()) {
-                    if (imageName.equals(".jpg"))
-                        Toast.makeText(getApplicationContext(), "Image name mustn't be empty!", Toast.LENGTH_LONG).show();
 
-                    else if(!itemTypeExists(itemType)) {
+                    if(!itemTypeExists(itemType) && imageNameIsGood(imageName)) {
 
                         createDirectories(itemType);
                         fullSizeImageFolderLocation = FULL_SIZE_FOLDER_LOCATION + File.separator + itemType;
                         capturePhoto(imageName, fullSizeImageFolderLocation);
-
                     }
 
                 }
@@ -76,10 +73,8 @@ public class CameraActivity extends AppCompatActivity {
                     if(spinner.getAdapter().getCount()==0) {
                         Toast.makeText(getApplicationContext(), "Enter item type to continue!", Toast.LENGTH_LONG).show();
                     }
-                    else if (imageName.equals(".jpg"))
-                        Toast.makeText(getApplicationContext(), "Image name mustn't be empty!", Toast.LENGTH_LONG).show();
 
-                    else {
+                    else if (imageNameIsGood(imageName)) {
                         itemType = spinner.getSelectedItem().toString();
                         fullSizeImageFolderLocation = FULL_SIZE_FOLDER_LOCATION + File.separator + itemType;
                         if (filenameExists(fullSizeImageFolderLocation, imageName))
@@ -124,6 +119,27 @@ public class CameraActivity extends AppCompatActivity {
                 directory.mkdir();
             }*/
         }
+    }
+
+    private boolean imageNameIsGood(String imageName) {
+
+        //remove spaces before
+        while(imageName.startsWith(" ")) {
+            imageName = imageName.substring(1);
+        }
+
+        //remove spaces after
+        while(imageName.endsWith(" ")) {
+            imageName = imageName.substring(0, imageName.length() - 1 );
+        }
+
+        // If imageName is empty
+        if (imageName.equals(".jpg")) {
+            Toast.makeText(getApplicationContext(), "Image name mustn't be empty!", Toast.LENGTH_LONG).show();
+            return false;
+        }
+
+        return true;
     }
 
     public boolean itemTypeExists (String newItemType) {
@@ -174,7 +190,7 @@ public class CameraActivity extends AppCompatActivity {
 
                 shrinkAndSaveImage(fullSizeImageFolderLocation, imageName);
                 Toast.makeText(getApplicationContext(), "Image saved successfully", Toast.LENGTH_LONG).show();
-
+                restartActivity();
             }
             else Toast.makeText(getApplicationContext(), "Image not saved", Toast.LENGTH_LONG).show();
 
@@ -218,7 +234,7 @@ public class CameraActivity extends AppCompatActivity {
 
             // Save compressed image
             outStream = new FileOutputStream(file);
-            bm.compress(Bitmap.CompressFormat.JPEG, 100, outStream);
+            bm.compress(Bitmap.CompressFormat.JPEG, 10, outStream);
 
             outStream.flush();
             outStream.close();
@@ -278,5 +294,12 @@ public class CameraActivity extends AppCompatActivity {
 
         bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
         return bitmap;
+    }
+
+    private void restartActivity() {
+        //restart activity
+        Intent intent = getIntent();
+        finish();
+        startActivity(intent);
     }
 }

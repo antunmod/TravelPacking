@@ -27,6 +27,7 @@ public class WardrobeActivity extends AppCompatActivity {
     private FloatingActionButton addNewItem;
     SharedPreferences prefs;
     static final int REQUEST_CODE = 1;
+    static final int EXTENSION_LENGTH = 4;
 
 
     @Override
@@ -49,12 +50,31 @@ public class WardrobeActivity extends AppCompatActivity {
             }
 
         });
+
+        getIntent().setAction("Created");
+    }
+
+    @Override
+    protected void onResume () {
+        String action = getIntent().getAction();
+
+        //Restart activity to update items list
+        if(action == null || !action.equals("Created")) {
+            Intent intent = getIntent();
+            finish();
+            startActivity(intent);
+        }
+        else
+            getIntent().setAction(null);
+
+        super.onResume();
     }
 
 
     private ArrayList<ImageItem> getData() {
         final ArrayList<ImageItem> imageItems = new ArrayList<>();
         File dir = new File(FOLDER_LOCATION + File.separator + ".compressed");
+
         File[] folderList = dir.listFiles();
         if(folderList.length == 0)
             return imageItems;
@@ -66,17 +86,10 @@ public class WardrobeActivity extends AppCompatActivity {
             options.inSampleSize = 8;
             for(File image : images) {
                 Bitmap bitmap = BitmapFactory.decodeFile(image.getAbsolutePath(), options);
-                imageItems.add(new ImageItem(bitmap, image.getName()));
+                String imageName = image.getName();
+                imageItems.add(new ImageItem(bitmap, imageName.substring(0, imageName.length() - EXTENSION_LENGTH)));
             }
         }
-
-        /*if(imageList==null)
-            return imageItems;
-        for (File f : imageList) {
-            Bitmap bitmap = BitmapFactory.decodeFile(f.getAbsolutePath(), options);
-            //bitmap = getResizedBitmap(bitmap, 200, 200);
-            imageItems.add(new ImageItem(bitmap, "Test"));
-        }*/
         return imageItems;
     }
 
