@@ -1,7 +1,10 @@
 package antunmod.projects.travelpacking;
 
+import android.content.Intent;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 
@@ -14,6 +17,7 @@ public class ListsActivity extends AppCompatActivity {
 
     ListView listView;
     SimpleAdapter simpleAdapter;
+    FloatingActionButton floatingActionButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,6 +28,17 @@ public class ListsActivity extends AppCompatActivity {
         simpleAdapter = new SimpleAdapter(this, getData(), android.R.layout.simple_list_item_2,
                 new String[] {"listName", "listString"}, new int[] {android.R.id.text1, android.R.id.text2});
         listView.setAdapter(simpleAdapter);
+
+        floatingActionButton = (FloatingActionButton) findViewById(R.id.floatingActionButton);
+        floatingActionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent createListIntent = new Intent(getApplicationContext(), CreateList.class);
+                startActivity(createListIntent);
+            }
+        });
+
+
     }
 
     public List<Map<String, String>> getData () {

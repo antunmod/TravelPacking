@@ -25,7 +25,6 @@ public class WardrobeActivity extends AppCompatActivity {
     };
     final String FOLDER_LOCATION = Environment.getExternalStorageDirectory() + File.separator + "TravelPacking";
     private FloatingActionButton addNewItem;
-    SharedPreferences prefs;
     static final int REQUEST_CODE = 1;
     static final int EXTENSION_LENGTH = 4;
 
@@ -35,7 +34,6 @@ public class WardrobeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_wardrobe);
 
-        prefs= getSharedPreferences("aName", Context.MODE_PRIVATE);
 
         gridView = (GridView) findViewById(R.id.gridView);
         gridAdapter = new GridViewAdapter(this, R.layout.grid_item_layout, getData());

@@ -45,7 +45,9 @@
         <activity
             android:name=".CameraActivity"
             android:configChanges="orientation|keyboardHidden|screenSize" />
-        <activity android:name=".ListsActivity"></activity>
+        <activity android:name=".ListsActivity" />
+        <activity android:name=".ReorderActivity" />
+        <activity android:name=".CreateList"></activity>
     </application>
 
 </manifest>
