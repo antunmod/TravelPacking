@@ -17,6 +17,7 @@ public class MainActivity extends AppCompatActivity {
     private String FOLDER_LOCATION = Environment.getExternalStorageDirectory() + File.separator + "TravelPacking";
     private String COMPRESSED_FOLDER_LOCATION = FOLDER_LOCATION + File.separator + ".compressed";
     private String FULL_SIZE_FOLDER_LOCATION = FOLDER_LOCATION + File.separator + ".fullSize";
+    private String LISTS_FOLDER_LOCATION = FOLDER_LOCATION + File.separator + "lists";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
         createRequiredFolder(FOLDER_LOCATION);
         createRequiredFolder(COMPRESSED_FOLDER_LOCATION);
         createRequiredFolder(FULL_SIZE_FOLDER_LOCATION);
+        createRequiredFolder(LISTS_FOLDER_LOCATION);
 
         File dir = new File (COMPRESSED_FOLDER_LOCATION);
 

@@ -6,30 +6,45 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class CreateList extends AppCompatActivity {
 
-    String COMPRESSED_FOLDER_LOCATION = Environment.getExternalStorageDirectory() + File.separator + "TravelPacking" +
-            File.separator + ".compressed";
+    String FOLDER_LOCATION = Environment.getExternalStorageDirectory() + File.separator + "TravelPacking";
+    String COMPRESSED_FOLDER_LOCATION = FOLDER_LOCATION + File.separator + ".compressed";
+    String LISTS_FOLDER_LOCATION = FOLDER_LOCATION + File.separator + "lists";
     ListView listView;
     String[] itemTypes;
+    Button btnOrderList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_list);
 
-        listView = (ListView) findViewById(R.id.listView_items);
+        listView = (ListView) findViewById(R.id.itemsListView);
         itemTypes = getData();
         ItemsListAdapter itemsListAdapter = new ItemsListAdapter();
         listView.setAdapter(itemsListAdapter);
+
+        btnOrderList = (Button) findViewById(R.id.btnOrderList);
+        btnOrderList.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                createNewList();
+            }
+        });
     }
 
     // Get the names of folders and return them in a String array
@@ -46,6 +61,26 @@ public class CreateList extends AppCompatActivity {
         returnStringList.toArray(returnString);
 
         return returnString;
+    }
+
+    private void createNewList() {
+        String saveString = "";
+        for (int i = 0; i < itemTypes.length; ++i) {
+            saveString += itemTypes[i];
+            if (i != itemTypes.length -1 )
+                saveString += "|";
+        }
+
+        try {
+            File newList = new File(LISTS_FOLDER_LOCATION, "aaa.txt");
+            FileWriter writer = new FileWriter((newList));
+            writer.append(saveString);
+            writer.flush();
+            writer.close();
+            Toast.makeText(getApplicationContext(), "Saved", Toast.LENGTH_LONG).show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     class ItemsListAdapter extends BaseAdapter {
