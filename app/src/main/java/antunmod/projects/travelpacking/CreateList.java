@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -18,6 +19,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static antunmod.projects.travelpacking.Utility.modifyName;
+import static antunmod.projects.travelpacking.Utility.nameIsValid;
+
 public class CreateList extends AppCompatActivity {
 
     String FOLDER_LOCATION = Environment.getExternalStorageDirectory() + File.separator + "TravelPacking";
@@ -27,6 +31,7 @@ public class CreateList extends AppCompatActivity {
     String[] itemTypes;
     Button btnOrderList;
     CustomListItem[] customListItem;
+    EditText editListName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,14 +45,24 @@ public class CreateList extends AppCompatActivity {
         ItemsListAdapter itemsListAdapter = new ItemsListAdapter();
         listView.setAdapter(itemsListAdapter);
 
+        editListName = (EditText) findViewById(R.id.editListName);
+
+
         btnOrderList = (Button) findViewById(R.id.btnOrderList);
         btnOrderList.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                createNewList();
+                String listName = editListName.getText().toString();
+                listName = modifyName(listName);
+                listName += ".txt";
+                if(nameIsValid(listName))
+                    createNewList(listName);
+                else
+                    Toast.makeText(getApplicationContext(), "List name mustn't be empty!", Toast.LENGTH_LONG).show();
             }
         });
+
+
 
     }
 
@@ -67,9 +82,8 @@ public class CreateList extends AppCompatActivity {
         return returnString;
     }
 
-    private void createNewList() {
+    private void createNewList(String listName) {
         String saveString = "";
-        ItemsListAdapter itemsListAdapter = (ItemsListAdapter) listView.getAdapter();
 
         int noOfSelectedItems = getNoOfSelectedItems();
         int noOfAddedItems = 0;
@@ -83,13 +97,18 @@ public class CreateList extends AppCompatActivity {
             }
         }
 
+        if(noOfAddedItems == 0) {
+            Toast.makeText(getApplicationContext(), "Select some items to be added to the list!", Toast.LENGTH_LONG).show();
+            return;
+        }
+
         try {
-            File newList = new File(LISTS_FOLDER_LOCATION, "aab.txt");
+            File newList = new File(LISTS_FOLDER_LOCATION, listName);
             FileWriter writer = new FileWriter((newList));
             writer.append(saveString);
             writer.flush();
             writer.close();
-            Toast.makeText(getApplicationContext(), "Saved", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "list " + listName + " saved!", Toast.LENGTH_LONG).show();
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -26,6 +26,12 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import static antunmod.projects.travelpacking.Utility.filenameExists;
+import static antunmod.projects.travelpacking.Utility.modifyName;
+import static antunmod.projects.travelpacking.Utility.createFolder;
+import static antunmod.projects.travelpacking.Utility.nameIsValid;
+
+
 public class CameraActivity extends AppCompatActivity {
 
     EditText editItemName;
@@ -33,13 +39,13 @@ public class CameraActivity extends AppCompatActivity {
     final static String FOLDER_LOCATION = Environment.getExternalStorageDirectory() + File.separator + "TravelPacking";
     final static String COMPRESSED_FOLDER_LOCATION = FOLDER_LOCATION + File.separator + ".compressed";
     final static String FULL_SIZE_FOLDER_LOCATION = FOLDER_LOCATION + File.separator + ".fullSize";
-    static final String[] EXTENSIONS = new String[]{
-            "gif", "png", "bmp", "jpg" // and other formats you need
-    };
+
     Spinner spinner;
     Button btnTakePhoto;
     List<String> spinnerList;
     int CAPTURE_IMAGE_REQUEST_CODE = 1;
+    protected static int EXTENSION_LENGTH = 4;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,10 +65,14 @@ public class CameraActivity extends AppCompatActivity {
 
                 //If something is written in the ItemTypeEditText field, check whether to add new item
                 if(!itemType.isEmpty()) {
+                    imageName = modifyName(imageName);
 
-                    if(!itemTypeExists(itemType) && imageNameIsValid(imageName)) {
+                    if(!nameIsValid(imageName))
+                        Toast.makeText(getApplicationContext(), "Image name mustn't be empty!", Toast.LENGTH_LONG).show();
 
-                        createDirectories(itemType);
+                    else if (!itemTypeExists(itemType)) {
+                        createFolder(COMPRESSED_FOLDER_LOCATION + File.separator + itemType);
+                        createFolder(FULL_SIZE_FOLDER_LOCATION + File.separator + itemType);
                         fullSizeImageFolderLocation = FULL_SIZE_FOLDER_LOCATION + File.separator + itemType;
                         capturePhoto(imageName, fullSizeImageFolderLocation);
                     }
@@ -74,7 +84,7 @@ public class CameraActivity extends AppCompatActivity {
                         Toast.makeText(getApplicationContext(), "Enter item type to continue!", Toast.LENGTH_LONG).show();
                     }
 
-                    else if (imageNameIsValid(imageName)) {
+                    else if (nameIsValid(imageName)) {
                         itemType = spinner.getSelectedItem().toString();
                         fullSizeImageFolderLocation = FULL_SIZE_FOLDER_LOCATION + File.separator + itemType;
                         if (filenameExists(fullSizeImageFolderLocation, imageName))
@@ -105,42 +115,15 @@ public class CameraActivity extends AppCompatActivity {
         spinner.setAdapter(dataAdapter);
     }
 
-    private void createDirectories (String newItemType) {
-
-        List<String> folders = new ArrayList<>();
-
-        folders.add(COMPRESSED_FOLDER_LOCATION);
-        folders.add(FULL_SIZE_FOLDER_LOCATION);
-
-        for(String folder : folders) {
-            MainActivity.createRequiredFolder(folder + File.separator + newItemType);
-            /*File directory = new File(folder + File.separator + newItemType);
-            if (!directory.exists()) {
-                directory.mkdir();
-            }*/
-        }
-    }
-
-    private boolean imageNameIsValid(String imageName) {
-
-        //remove spaces before
-        while(imageName.startsWith(" ")) {
-            imageName = imageName.substring(1);
-        }
-
-        //remove spaces after
-        while(imageName.endsWith(" ")) {
-            imageName = imageName.substring(0, imageName.length() - 1 );
-        }
+    /*protected static boolean nameIsValid(String name) {
 
         // If imageName is empty
-        if (imageName.equals(".jpg")) {
-            Toast.makeText(getApplicationContext(), "Image name mustn't be empty!", Toast.LENGTH_LONG).show();
+        if (name.length()== EXTENSION_LENGTH) {
             return false;
         }
 
         return true;
-    }
+    }*/
 
     public boolean itemTypeExists (String newItemType) {
         for (String item : spinnerList) {
@@ -152,7 +135,7 @@ public class CameraActivity extends AppCompatActivity {
         return false;
     }
 
-    private boolean filenameExists (String fileLocation, String filename) {
+    /*private boolean filenameExists (String fileLocation, String filename) {
         File dir = new File(fileLocation);
         File[] imageList = dir.listFiles(IMAGE_FILTER);
         for(File f : imageList) {
@@ -160,7 +143,7 @@ public class CameraActivity extends AppCompatActivity {
                 return true;
         }
         return false;
-    }
+    }*/
 
     private void capturePhoto(String imageName, String fullSizeImageFolderLocation) {
         Intent imageIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -197,7 +180,7 @@ public class CameraActivity extends AppCompatActivity {
         }
     }
 
-    // filter to identify images based on their extensions
+    /*// filter to identify images based on their extensions
     static final FilenameFilter IMAGE_FILTER = new FilenameFilter() {
 
         @Override
@@ -209,7 +192,7 @@ public class CameraActivity extends AppCompatActivity {
             }
             return (false);
         }
-    };
+    };*/
 
     public void shrinkAndSaveImage(String fullSizeImageFolderLocation, String imageName) {
         //get to correct folder
