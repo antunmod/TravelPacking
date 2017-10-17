@@ -26,6 +26,7 @@ public class CreateList extends AppCompatActivity {
     ListView listView;
     String[] itemTypes;
     Button btnOrderList;
+    CustomListItem[] customListItem;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +35,8 @@ public class CreateList extends AppCompatActivity {
 
         listView = (ListView) findViewById(R.id.itemsListView);
         itemTypes = getData();
+        customListItem = new CustomListItem[itemTypes.length];
+
         ItemsListAdapter itemsListAdapter = new ItemsListAdapter();
         listView.setAdapter(itemsListAdapter);
 
@@ -45,6 +48,7 @@ public class CreateList extends AppCompatActivity {
                 createNewList();
             }
         });
+
     }
 
     // Get the names of folders and return them in a String array
@@ -65,14 +69,22 @@ public class CreateList extends AppCompatActivity {
 
     private void createNewList() {
         String saveString = "";
-        for (int i = 0; i < itemTypes.length; ++i) {
-            saveString += itemTypes[i];
-            if (i != itemTypes.length -1 )
-                saveString += "|";
+        ItemsListAdapter itemsListAdapter = (ItemsListAdapter) listView.getAdapter();
+
+        int noOfSelectedItems = getNoOfSelectedItems();
+        int noOfAddedItems = 0;
+        for (int i = 0; i < customListItem.length; ++i) {
+            if(customListItem[i].getCheckBox()) {
+                saveString += itemTypes[i];
+                if (noOfAddedItems != noOfSelectedItems - 1) {
+                    ++noOfAddedItems;
+                    saveString += "|";
+                }
+            }
         }
 
         try {
-            File newList = new File(LISTS_FOLDER_LOCATION, "aaa.txt");
+            File newList = new File(LISTS_FOLDER_LOCATION, "aab.txt");
             FileWriter writer = new FileWriter((newList));
             writer.append(saveString);
             writer.flush();
@@ -81,6 +93,15 @@ public class CreateList extends AppCompatActivity {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private int getNoOfSelectedItems() {
+        int noOfSelectedItems = 0;
+        for (int i = 0; i < customListItem.length; ++i) {
+            if(customListItem[i].getCheckBox())
+                ++noOfSelectedItems;
+        }
+        return noOfSelectedItems;
     }
 
     class ItemsListAdapter extends BaseAdapter {
@@ -92,12 +113,12 @@ public class CreateList extends AppCompatActivity {
 
         @Override
         public Object getItem(int i) {
-            return null;
+            return customListItem[i];
         }
 
         @Override
         public long getItemId(int i) {
-            return 0;
+            return i;
         }
 
         @Override
@@ -105,7 +126,16 @@ public class CreateList extends AppCompatActivity {
             view = getLayoutInflater().inflate(R.layout.checked_list_item, null);
 
             TextView itemType = (TextView) view.findViewById(R.id.textView_itemType);
-            CheckBox checkBox = (CheckBox) view.findViewById(R.id.checkbox);
+            final CheckBox checkBox = (CheckBox) view.findViewById(R.id.checkbox);
+
+            final int position = i;
+            checkBox.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    customListItem[position].setCheckBox(checkBox.isChecked());
+                }
+            });
+            customListItem[i] = new CustomListItem(itemTypes[i], false);
 
             itemType.setText(itemTypes[i]);
             return view;
