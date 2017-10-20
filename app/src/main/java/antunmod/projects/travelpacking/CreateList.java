@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static antunmod.projects.travelpacking.Utility.filenameExists;
 import static antunmod.projects.travelpacking.Utility.modifyName;
 import static antunmod.projects.travelpacking.Utility.nameIsValid;
 
@@ -56,7 +57,11 @@ public class CreateList extends AppCompatActivity {
                 listName = modifyName(listName);
                 listName += ".txt";
                 if(nameIsValid(listName))
-                    createNewList(listName);
+                    if(!filenameExists(LISTS_FOLDER_LOCATION, listName))
+                        createNewList(listName);
+                    else
+                        Toast.makeText(getApplicationContext(), "A list with the given name already exists!",
+                                Toast.LENGTH_LONG).show();
                 else
                     Toast.makeText(getApplicationContext(), "List name mustn't be empty!", Toast.LENGTH_LONG).show();
             }
@@ -91,9 +96,9 @@ public class CreateList extends AppCompatActivity {
             if(customListItem[i].getCheckBox()) {
                 saveString += itemTypes[i];
                 if (noOfAddedItems != noOfSelectedItems - 1) {
-                    ++noOfAddedItems;
                     saveString += "|";
                 }
+                ++noOfAddedItems;
             }
         }
 
