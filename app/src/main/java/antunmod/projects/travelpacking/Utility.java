@@ -80,5 +80,8 @@ public class Utility {
         return false;
     }
 
-
+    protected static String removeExtension (String name) {
+        name = name.substring(0, name.length() - EXTENSION_LENGTH);
+        return name;
+    }
 }
