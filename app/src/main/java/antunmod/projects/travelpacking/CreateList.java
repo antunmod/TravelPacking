@@ -1,5 +1,6 @@
 package antunmod.projects.travelpacking;
 
+import android.content.Intent;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -57,13 +58,20 @@ public class CreateList extends AppCompatActivity {
                 listName = modifyName(listName);
                 listName += ".txt";
                 if(nameIsValid(listName))
-                    if(!filenameExists(LISTS_FOLDER_LOCATION, listName))
-                        createNewList(listName);
+                    if(!filenameExists(LISTS_FOLDER_LOCATION, listName)) {
+                        if (createNewList(listName)) {
+                            Intent reorderIntent = new Intent(getApplicationContext(), ReorderActivity.class);
+                            reorderIntent.putExtra("listName", listName);
+                            startActivity(reorderIntent);
+                        }
+                    }
                     else
                         Toast.makeText(getApplicationContext(), "A list with the given name already exists!",
                                 Toast.LENGTH_LONG).show();
                 else
                     Toast.makeText(getApplicationContext(), "List name mustn't be empty!", Toast.LENGTH_LONG).show();
+
+                //
             }
         });
 
@@ -87,7 +95,7 @@ public class CreateList extends AppCompatActivity {
         return returnString;
     }
 
-    private void createNewList(String listName) {
+    private boolean createNewList(String listName) {
         String saveString = "";
 
         int noOfSelectedItems = getNoOfSelectedItems();
@@ -104,7 +112,7 @@ public class CreateList extends AppCompatActivity {
 
         if(noOfAddedItems == 0) {
             Toast.makeText(getApplicationContext(), "Select some items to be added to the list!", Toast.LENGTH_LONG).show();
-            return;
+            return false;
         }
 
         try {
@@ -117,6 +125,7 @@ public class CreateList extends AppCompatActivity {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return true;
     }
 
     private int getNoOfSelectedItems() {

@@ -13,11 +13,17 @@
      limitations under the License.
 -->
 
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/mainLayout"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="#FFF"
-    android:gravity="center_vertical"
-    android:paddingLeft="15dp"
-    android:paddingRight="15dp"
-    android:textSize="30sp" />
+    android:layout_height="match_parent"
+    tools:context="antunmod.projects.travelpacking.ReorderActivity" >
+
+        <com.example.android.listviewdragginganimation.DynamicListView
+            android:id="@+id/listview"
+            android:background="#0000"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+</RelativeLayout>
